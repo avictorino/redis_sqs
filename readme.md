@@ -1,7 +1,3 @@
-
-#### Title
-Comparative between AWS SQS and RedisQueue with an async background process to process thousands of requests. 
-
 #### Summary
 The goal is to improve performance by decreasing the microservice resources usage and performs integrations in the shortest time.
 The company expects to expand and it will not be possible to reach a demand of approximately 1 million shipments, currently in the range of 100,000 and hundreds of workers running in a matter of hours.
