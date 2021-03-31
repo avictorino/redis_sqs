@@ -1,0 +1,53 @@
+version: "3"
+
+services:
+
+  redis:
+    ports:
+      - 6378:6379
+    image: redis:alpine
+    restart: always
+    volumes:
+      - pubsub_data:/data
+
+  subscriber:
+    build: ./
+    image: python-redis-queue
+    deploy:
+      replicas: 1
+    env_file:
+      - .env
+    command: celery -A task worker --loglevel=INFO --autoscale=10,5
+
+  publisher:
+    build: ./
+    image: python-redis-queue
+    deploy:
+      replicas: 1
+    environment:
+      PUBLISHER_DELAY: 0.5
+    env_file:
+      - .env
+    command: python publisher.py
+
+  worker:
+    build: ./
+    image: python-redis-queue
+    deploy:
+      replicas: 1
+    env_file:
+      - .env
+    command: celery -A task worker --loglevel=ERROR --pool=gevent --autoscale=10,5
+
+  flower:
+      image: python-redis-queue
+      ports:
+        - "5004:5004"
+      env_file:
+        - .env
+      command: celery flower -A task --address=0.0.0.0 --port=5004 --loglevel=ERROR
+      depends_on:
+        - worker
+
+volumes:
+  pubsub_data:
